@@ -162,14 +162,15 @@ def main():
                 pywikibot.output( u"\n== " + firstLetter + u' ==' )
                 outText += u"\n== " + firstLetter + u" ==\n"
                 prevLetter = firstLetter
-            pywikibot.output( u'* [[' + subPage + u']]')
+            #pywikibot.output( u'* [[' + subPage + u']]')
             outText += u'* [[' + subPage + u"]] <--- [[" + origMainPage + u"]]\n"
     
     reportPage = pywikibot.Page(wikiSite, reportPageName)
 
     localtime = strftime("%Y-%m-%d %H:%M:%S")
     addTxt = u"Linkimata täpsustusmärkega lehed " + localtime + u" seisuga.\n\n"
-    outText = addTxt + outText 
+    footer = u"\n\n[[Kategooria:Tähelepanu ootavad artiklid|Linkimata täpsustusmärkega lehed]]"
+    outText = addTxt + outText + footer
     #print outText
     commentText = u'uuendan'
     
