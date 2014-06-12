@@ -1,9 +1,9 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8  -*-
 
 '''
 
-kontrolli kas (täpsustusega) lehed on lingitud pealehelt
+kontrolli kas (täpsustusega) lehed on lingitud pealehelt 
 
 '''
 
@@ -22,13 +22,13 @@ DEBUG = False
 
 def connectWikiDatabase(lang):
     '''
-Connect to the wiki database
-'''
+    Connect to the wiki database
+    '''
     if (lang):
         hostName = lang + 'wiki.labsdb'
         dbName = lang + 'wiki_p'
         conn = MySQLdb.connect(host=hostName, db=dbName,
-            read_default_file=os.path.expanduser("~/.my.cnf"),
+            read_default_file=os.path.expanduser("~/.my.cnf"), 
             use_unicode=True, charset='utf8')
         cursor = conn.cursor()
         return (conn, cursor)
@@ -36,43 +36,43 @@ Connect to the wiki database
 def getSubPages(cursor):
     outSubPages = []
     query = """SELECT page_title
-FROM page
-WHERE page_title LIKE '%(%'
-AND page_namespace = 0
-AND page_is_redirect = 0
-"""
+        FROM page
+        WHERE page_title LIKE '%(%'
+        AND page_namespace = 0
+        AND page_is_redirect = 0
+        """
     #cursor.execute( query, (WP_ARTICLE_NS, ) )
     cursor.execute( query )
     if DEBUG:
-        print cursor._executed
+        print cursor._executed        
     while True:
         try:
             (pageTitle,) = cursor.fetchone()
             outSubPages.append( pageTitle )
         except TypeError:
-            break
+            break  
     
-    return outSubPages
+    return outSubPages    
 
 def getRedirTitle(inPage, cursor):
     redirTitle = ''
 
     query = """SELECT page_id FROM page
-WHERE page_title = %s
-AND page_namespace = %s
-AND page_is_redirect = 1"""
+        WHERE page_title = %s 
+        AND page_namespace = %s
+        AND page_is_redirect = 1"""
     cursor.execute(query, (inPage, WP_ARTICLE_NS))
        
     if DEBUG:
-        print cursor._executed
+        print cursor._executed   
         
-    if (cursor.rowcount):
+    if (cursor.rowcount): 
         (pageId,) = cursor.fetchone()
         t_query = """SELECT rd_title FROM redirect
-WHERE rd_from = %s
-AND rd_namespace = %s"""
+                WHERE rd_from = %s
+                AND rd_namespace = %s"""
         cursor.execute(t_query, (pageId, WP_ARTICLE_NS))
-        if (cursor.rowcount):
+        if (cursor.rowcount): 
             (redirTitle,) = cursor.fetchone()
     
     redirTitle = unicode(redirTitle, "utf-8", errors='ignore')
@@ -82,9 +82,9 @@ AND rd_namespace = %s"""
 def getIncomingRedirs(inPage, cursor):
     outIncomingRedirs = []
     query = """SELECT page_title FROM page
-JOIN redirect ON page.page_id = redirect.rd_from
-WHERE rd_title = %s
-AND rd_namespace = %s"""
+                JOIN redirect ON page.page_id = redirect.rd_from
+                WHERE rd_title = %s
+                AND rd_namespace = %s"""
     cursor.execute(query, (inPage, WP_ARTICLE_NS))
     while True:
         try:
@@ -93,17 +93,17 @@ AND rd_namespace = %s"""
         except TypeError:
             break
         
-    return outIncomingRedirs
+    return outIncomingRedirs   
     
 def isLinkedFromMain(subPage, mainPage, cursor):
     #subPage = subPage.replace(u' ', u'_')
     #mainPage = mainPage.replace(u' ', u'_')
     query = """SELECT 1 FROM page
-JOIN pagelinks ON page.page_id = pagelinks.pl_from
-WHERE page_title = %s
-AND page_namespace = %s
-AND pl_namespace = %s
-AND pl_title = %s """
+        JOIN pagelinks ON page.page_id = pagelinks.pl_from 
+        WHERE page_title = %s 
+        AND page_namespace = %s
+        AND pl_namespace = %s
+        AND pl_title = %s """
     cursor.execute(query, (mainPage, WP_ARTICLE_NS, WP_ARTICLE_NS, subPage))
     if DEBUG:
         print cursor._executed
@@ -112,18 +112,18 @@ AND pl_title = %s """
     isLinked = False
     if (cursor.rowcount):
         isLinked = True
-    else: #check incoming redirs to subPage
+    else:  #check incoming redirs to subPage
         inRedirs = getIncomingRedirs(subPage, cursor)
         for inRedirTitle in inRedirs:
             query = """SELECT 1 FROM page
-JOIN pagelinks ON page.page_id = pagelinks.pl_from
-WHERE page_title = %s
-AND page_namespace = %s
-AND pl_namespace = %s
-AND pl_title = %s """
+                JOIN pagelinks ON page.page_id = pagelinks.pl_from 
+                WHERE page_title = %s 
+                AND page_namespace = %s
+                AND pl_namespace = %s
+                AND pl_title = %s """
             cursor.execute(query, (mainPage, WP_ARTICLE_NS, WP_ARTICLE_NS, inRedirTitle))
             if DEBUG:
-                print cursor._executed
+                print cursor._executed   
             if (cursor.rowcount):
                 isLinked = True
                 break
@@ -135,7 +135,7 @@ def main():
     targetWiki = u'et'
     outText = u''
     wikiSite = pywikibot.getSite( targetWiki, u'wikipedia' )
-    reportPageName = u'Kasutaja:WikedKentaur/linkimata täpsustusmärkega lehed'
+    reportPageName = u'Kasutaja:WikedKentaur/linkimata täpsustusmärkega lehed'  
     
     (conn, cursor) = connectWikiDatabase(targetWiki)
     subPages = getSubPages(cursor)
@@ -174,7 +174,7 @@ def main():
     #print outText
     commentText = u'uuendan'
     
-    reportPage.put(outText, comment = commentText)
+    reportPage.put(outText, comment = commentText)    
     
         
 if __name__ == "__main__":
