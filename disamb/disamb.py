@@ -159,7 +159,7 @@ def main():
             firstLetter = subPage[0]
             firstLetter.upper()
             if (firstLetter != prevLetter):
-                pywikibot.output( u"\n== " + firstLetter + u' ==' )
+                #pywikibot.output( u"\n== " + firstLetter + u' ==' )
                 outText += u"\n== " + firstLetter + u" ==\n"
                 prevLetter = firstLetter
             #pywikibot.output( u'* [[' + subPage + u']]')
