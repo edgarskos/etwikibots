@@ -11,14 +11,16 @@ list images that will be deleted from Commons and are used in local wiki
 import sys, os
 sys.path.append("/shared/pywikipedia/core")
 import MySQLdb
-from time import strftime
+import pywikibot
+#from time import strftime
+import time
 
 # "constants"
 
 # wikipedia category namespace
 WP_CATEGORY_NS = 14
 # output debug messages
-DEBUG = False
+DEBUG = True
 
 def connectWikiDatabase(lang):
     '''
@@ -37,8 +39,8 @@ def getSubCats(cursor, sourceCat):
     outSubCats = []
     sourceCat = sourceCat.replace(u' ', u'_')
     query = """SELECT page_title
-        FROM commonswiki_p.categorylinks
-        LEFT JOIN commonswiki_p.page ON page_id = cl_from
+        FROM commonswiki_f_p.categorylinks
+        LEFT JOIN commonswiki_f_p.page ON page_id = cl_from
         WHERE cl_to = %s
         AND page_namespace = %s"""
     cursor.execute(query, (sourceCat, WP_CATEGORY_NS))
@@ -56,20 +58,24 @@ def getSubCats(cursor, sourceCat):
 def getImages(cursor, imgCat):
     outImages = []
     query = """SELECT DISTINCT etwiki_p.imagelinks.il_to
-        FROM etwiki_p.imagelinks, commonswiki_p.image, commonswiki_p.categorylinks, commonswiki_p.page
-        WHERE etwiki_p.imagelinks.il_to = commonswiki_p.image.img_name
-        AND commonswiki_p.image.img_name = commonswiki_p.page.page_title
-        AND commonswiki_p.categorylinks.cl_from = commonswiki_p.page.page_id
-        AND commonswiki_p.categorylinks.cl_to = %s
+        FROM etwiki_p.imagelinks, commonswiki_f_p.image, commonswiki_f_p.categorylinks, commonswiki_f_p.page
+        WHERE etwiki_p.imagelinks.il_to = commonswiki_f_p.image.img_name
+        AND commonswiki_f_p.image.img_name = commonswiki_f_p.page.page_title
+        AND commonswiki_f_p.categorylinks.cl_from = commonswiki_f_p.page.page_id
+        AND commonswiki_f_p.categorylinks.cl_to = %s
         AND NOT EXISTS(
             SELECT  1
             FROM etwiki_p.image
             WHERE etwiki_p.image.img_name = etwiki_p.imagelinks.il_to
         )
         ORDER BY etwiki_p.imagelinks.il_to"""
+    start_time = time.gmtime()
     cursor.execute(query, (imgCat, ))
     if DEBUG:
-        print cursor._executed        
+        print cursor._executed
+        end_time = time.gmtime()
+        duration = (end_time - start_time) / 60
+        print " in %d minutes\n" % (duration)        
     while True:
         try:
             (imgName,) = cursor.fetchone()
@@ -120,8 +126,8 @@ def main():
     
     commentText = u'Kokku %d pilti' % totalImageCount
     
-    #print outText
-    galleryPage.put(outText, comment = commentText)    
+    print outText
+    #galleryPage.put(outText, comment = commentText)    
     
         
 if __name__ == "__main__":
